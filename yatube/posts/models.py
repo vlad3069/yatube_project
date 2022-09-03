@@ -1,7 +1,8 @@
 from django.db import models
 from django.contrib.auth import get_user_model
 
-User = get_user_model() 
+User = get_user_model()
+
 
 class Post(models.Model):
     text = models.TextField()
@@ -12,21 +13,22 @@ class Post(models.Model):
         User,
         on_delete=models.CASCADE,
         related_name='posts',
-        verbose_name='Автор',) 
+        verbose_name='Автор',)
     group = models.ForeignKey(
-        'Group', 
+        'Group',
         on_delete=models.CASCADE,
         blank=True,
         null=True,
         related_name='posts',
         verbose_name='Сообщество',)
 
+
 class Group(models.Model):
     title = models.CharField(
-        max_length=200, 
+        max_length=200,
         verbose_name='Заголовок')
     slug = models.SlugField(
-        null=False, 
+        null=False,
         unique=True,
         verbose_name='Адрес')
     description = models.TextField(
