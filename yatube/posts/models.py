@@ -19,7 +19,7 @@ class Post(models.Model):
         blank=True,
         null=True,
         related_name='posts',
-        verbose_name='Группа',)
+        verbose_name='Сообщество',)
 
 class Group(models.Model):
     title = models.CharField(
@@ -27,7 +27,8 @@ class Group(models.Model):
         verbose_name='Заголовок')
     slug = models.SlugField(
         null=False, 
-        unique=True)
+        unique=True,
+        verbose_name='Адрес')
     description = models.TextField(
         verbose_name='Описание группы')
 
