@@ -24,6 +24,10 @@ class Post(models.Model):
     class Meta:
         ordering = ['-pub_date']
 
+    class Post:
+        def __str__(self):
+            return self.text
+
 
 class Group(models.Model):
     title = models.CharField(
