@@ -1,6 +1,9 @@
+from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import redirect, render, get_object_or_404
+
 from .models import Post, Group
+from .forms import PostForm
 
 LIMIT = 10
 
@@ -26,6 +29,21 @@ def group_posts(request, slug):
         'posts': posts,
     }
     return render(request, template, context)
+
+
+@login_required()
+def post_create(request):
+    form = PostForm(request.POST or None)
+    template = "posts/create_post.html"
+    context = {
+        'form': form,
+    }
+    if not form.is_valid():
+        return render(request, template, context)
+    post = form.save(commit=False)
+    post.author = request.user
+    post.save()
+    return redirect('posts:index')
 
 
 def profile(request, username):

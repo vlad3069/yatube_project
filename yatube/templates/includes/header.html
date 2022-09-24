@@ -25,10 +25,10 @@
         </li>
         {% if user.is_authenticated %}
         <li class="nav-item"> 
-          <a class="nav-link" href="{% url 'users:new_post' %}">Новая запись</a>
+          <a class="nav-link" href="{% url 'posts:post_create' %}">Новая запись</a>
         </li>
         <li class="nav-item"> 
-          <a class="nav-link link-light" href="{% url 'users:password_change' %}">Изменить пароль</a>
+          <a class="nav-link link-light" href="{% url 'users:password_change_form' %}">Изменить пароль</a>
         </li>
         <li class="nav-item"> 
           <a class="nav-link link-light" href="{% url 'users:logout' %}">Выйти</a>
