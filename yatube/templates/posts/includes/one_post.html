@@ -1,18 +1,16 @@
-<div class="card mb-3 mt-1 shadow-sm">
-    <div class="card-body">
-            <p class="card-text">
-                    <!-- Ссылка на страницу автора в атрибуте href; username автора в тексте ссылки -->
-                    <a href="/{{ post.author }}/"><strong class="d-block text-gray-dark">@{{ post.author }}</strong></a>
-                    <!-- Текст поста -->
-                    {{ post.text }}
-            </p>
-            <div class="d-flex justify-content-between align-items-center">
-                    <div class="btn-group ">
-                            <!-- Ссылка на редактирование, показывается только автору записи -->
-                            <a class="btn btn-sm text-muted" href="/{{ post.author }}/{{post.id}}/edit" role="button">Редактировать</a>
-                    </div>
-                    <!-- Дата публикации  -->
-                    <small class="text-muted">{{ post.pub_date|date:"d M Y" }}</small>
-            </div>
-    </div>
-</div>
+<ul>
+  Дата публикации: {{ post.pub_date|date:"d E Y" }}
+</ul>
+<p>{{ post.text }}</p>
+<a href="{% url 'posts:post_detail' post.pk %}">
+  Подробная информация
+</a>
+<p>  
+  {% if post.group %}
+    {{ post.group }}   
+      <a href="{% url 'posts:group_list' post.group.slug %}">все записи группы</a>
+  {% else %}
+    Не в группе
+  {% endif %}
+</p>  
+{% if not forloop.last %}<hr>{% endif %} 

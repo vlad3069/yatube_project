@@ -1,66 +1,57 @@
-<!DOCTYPE html>
-<html lang="ru">
-  <head>
-    <!-- Подключены иконки, стили и заполенены мета теги -->
-    <title>Пост <!-- Первые 30 букв поста --></title>
-  </head>
-  <body>
-    <header>
-      <nav class="navbar navbar-light" style="background-color: lightskyblue">
-        <div class="container">
-          <a class="navbar-brand" href="/">
-            <img src="/static/img/logo.png" width="30" height="30" class="d-inline-block align-top" alt="">
-            <span style="color:red">Ya</span>tube
-          </a>
-        </div>
-      </nav>      
-    </header>
-    <main>
-      <div class="row">
-        <aside class="col-12 col-md-3">
-          <ul class="list-group list-group-flush">
-            <li class="list-group-item">
-              Дата публикации: <!-- 31 июля 1854 --> 
-            </li>
-            <!-- если у поста есть группа -->   
-            <li class="list-group-item">
-              Группа: <!-- Название группы -->
-              <a href="<!-- -->">
-                все записи группы
-              </a>
-            </li>
-            <li class="list-group-item">
-              Автор: <!--Лев Толстой-->
-            </li>
-            <li class="list-group-item d-flex justify-content-between align-items-center">
-              Всего постов автора:  <span ><!-- --></span>
-            </li>
-            <li class="list-group-item">
-              <a href="<!-- -->">
-                все посты пользователя
-              </a>
-            </li>
-          </ul>
-        </aside>
-        <article class="col-12 col-md-9">
-          <p>
-           <!--
-            [Фокшаны.] Еще переходъ до Фокшанъ, во время котораго я ѣхалъ съ 
-            Монго. Человѣкъ пустой, но съ твердыми, хотя и ложными убѣжденіями.
-            Генерал[у] по этому должно быть случаю, угодно было спрашивать о мое
-            мъ здоровьи.
-            Свинья! К[о]вырялъ носъ и ничего не написалъ — вотъ 2 упрека за 
-            нын[ѣшній]     день. Послѣдній упрекъ становится слишкомъ частъ, 
-            хотя походъ и можетъ служить въ немъ отчасти извиненіемъ. 
-            Отношенія мои съ товарищами становятся такъ пріятны, что мнѣ 
-            жалко бросить штабъ. Здоровье кажется (2) лучше. 
-           --> 
-          </p>
-        </article>
-      </div> 
-    </main>
-    <footer class="border-top text-center py-3">
-      <p>© <!--2021 --> Copyright <span style="color:red">Ya</span>tube</p>
-    </footer>
-  </body>
-</html>
+{% extends 'base.html' %}
+{% block title %}Пост {{ post.text|truncatechars:30 }}{% endblock %}
+{% block content %}
+<div class="row">
+  <aside class="col-12 col-md-3">
+    <ul class="list-group list-group-flush">
+      <li class="list-group-item">
+        Дата публикации: {{ post.pub_date|date:"d E Y" }} 
+      </li>
+      <li class="list-group-item"> 
+        {% if post.group and not group.title %}   
+          {{ post.group }} 
+          <a href="{% url 'posts:group_list' post.group.slug %}">Все записи группы</a>
+        {% else %}
+          Группа не найдена
+        {% endif %} 
+        </li>
+
+      <li class="list-group-item">
+        Автор: {{ post.author.get_full_name }} {{ post.author }}
+      </li>
+      <li class="list-group-item d-flex justify-content-between align-items-center">
+        Всего постов автора: <span >{{ post.author.posts.count }}</span>
+      </li>
+      <li class="list-group-item">
+        <a href="{% url 'posts:profile' post.author %}">
+          Все посты пользователя
+        </a>
+      </li>
+    </ul>
+  </aside>
+  <article class="col-12 col-md-9">
+    <p>
+     
+      {{ post.text }}
+     
+    </p>
+    {% if post.author == user %}
+    <a class="btn btn-primary" href="{% url 'posts:post_edit' post.id %}">
+      редактировать запись
+    </a>
+    {% endif %} 
+  </article>
+</div> 
+ 
+{% endblock %}
+
+
+
+
+
+
+
+
+
+ 
+     

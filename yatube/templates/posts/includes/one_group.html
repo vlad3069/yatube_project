@@ -1,0 +1,10 @@
+<div>
+  <li> 
+    {% if post.group %}
+      {{ post.group }}   
+      <a href="{% url 'posts:group_list' post.group.slug %}">все записи</a>
+    {% else %}
+      Группа не найдена
+    {% endif %} 
+  </li> 
+</div>
