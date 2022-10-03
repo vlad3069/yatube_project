@@ -5,15 +5,20 @@ from django.shortcuts import redirect, render, get_object_or_404
 from .models import Post, Group, User
 from .forms import PostForm
 
+
 LIMIT = 10
 
 
-def index(request):
-    template = "posts/index.html"
-    posts = Post.objects.select_related("group")
+def pagin(posts, request):
     paginator = Paginator(posts, LIMIT)
     page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
+    return paginator.get_page(page_number)
+
+
+def index(request):
+    template = 'posts/index.html'
+    posts = Post.objects.select_related('group')
+    page_obj = pagin(posts, request)
     context = {
         'page_obj': page_obj,
     }
@@ -21,12 +26,10 @@ def index(request):
 
 
 def group_posts(request, slug):
-    template = "posts/group_list.html"
+    template = 'posts/group_list.html'
     group = get_object_or_404(Group, slug=slug)
-    posts = group.posts.all()[:LIMIT]
-    paginator = Paginator(posts, LIMIT)
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
+    posts = group.posts.all()
+    page_obj = pagin(posts, request)
     context = {
         'group': group,
         'page_obj': page_obj,
@@ -37,7 +40,7 @@ def group_posts(request, slug):
 @login_required()
 def post_create(request):
     form = PostForm(request.POST or None)
-    template = "posts/create_post.html"
+    template = 'posts/create_post.html'
     context = {
         'form': form,
     }
@@ -50,16 +53,15 @@ def post_create(request):
 
 
 @login_required()
-def post_edit(request,  post_id):
-    post = get_object_or_404(Post, pk=post_id,
-                             )
+def post_edit(request, post_id):
+    post = get_object_or_404(Post, pk=post_id,)
     form = PostForm(request.POST or None, instance=post)
-    template = "posts/create_post.html"
+    template = 'posts/create_post.html'
     context = {
-            "form": form,
-            'post': post,
-            "post_edit_flag": True
-            }
+        'form': form,
+        'post': post,
+        'post_edit_flag': True
+    }
     if request.user != post.author:
         return redirect('posts:post_detail', post_id)
     if form.is_valid():
@@ -70,22 +72,18 @@ def post_edit(request,  post_id):
 
 def profile(request, username):
     author = get_object_or_404(User, username=username)
-    template = "posts/profile.html"
+    template = 'posts/profile.html'
     posts = author.posts.all()
-    paginator = Paginator(posts, LIMIT)
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
+    page_obj = pagin(posts, request)
     context = {
         'page_obj': page_obj,
         'author': author,
-            }
+    }
     return render(request, template, context)
 
 
 def post_detail(request, post_id):
-    post = get_object_or_404(Post, pk=post_id,
-                             )
-    # Здесь код запроса к модели и создание словаря контекста
+    post = get_object_or_404(Post, pk=post_id,)
     context = {
         'post': post,
     }

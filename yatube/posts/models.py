@@ -25,9 +25,8 @@ class Post(models.Model):
     class Meta:
         ordering = ['-pub_date']
 
-    class Post:
-        def __str__(self):
-            return self.text
+    def __str__(self):
+        return self.text[:15]
 
 
 class Group(models.Model):

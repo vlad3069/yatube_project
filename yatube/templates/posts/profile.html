@@ -1,14 +1,14 @@
-{% extends "base.html" %}
+{% extends 'base.html' %}
 {% block title %}{{ author.get_full_name }} профайл пользователя{% endblock %}
 {% block content %}
 <main role="main" class="container">
   <div class="row">
-    {% include "posts/includes/user_info.html" %}
+    {% include 'posts/includes/user_info.html' %}
       <div class="col-md-9">                
         {% for post in page_obj %}
           {% include 'posts/includes/one_post.html' %}
         {% endfor %}
-            {% include "posts/includes/paginator.html" %}
+            {% include 'posts/includes/paginator.html' %}
       </div>
     </div>
 </main>

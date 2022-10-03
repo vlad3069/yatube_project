@@ -8,11 +8,11 @@
         Дата публикации: {{ post.pub_date|date:"d E Y" }} 
       </li>
       <li class="list-group-item"> 
-        {% if post.group and not group.title %}   
+        {% if post.group %}   
           {{ post.group }} 
           <a href="{% url 'posts:group_list' post.group.slug %}">Все записи группы</a>
         {% else %}
-          Группа не найдена
+        Не в группе
         {% endif %} 
         </li>
 
