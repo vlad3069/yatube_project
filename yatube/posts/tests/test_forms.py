@@ -45,7 +45,7 @@ class PostCreateFormTests(TestCase):
             follow=True
         )
         self.assertRedirects(response, reverse('posts:index'))
-        self.assertEqual(Post.objects.count(), posts_count+1)
+        self.assertEqual(Post.objects.count(), posts_count + 1)
         self.assertTrue(Post.objects.filter(text='Тестовый пост',).exists())
 
     def test_authorized_edit_post(self):
@@ -54,11 +54,11 @@ class PostCreateFormTests(TestCase):
             'text': 'Измененный текст',
         }
         response_edit = self.post_author.post(
-                reverse('posts:post_edit',
-                        kwargs={'post_id': post_id}),
-                data=form_data,
-                follow=True,
-                )
+            reverse('posts:post_edit',
+                    kwargs={'post_id': post_id}),
+            data=form_data,
+            follow=True,
+            )
         post_2 = Post.objects.get(id=post_id)
         self.assertEqual(response_edit.status_code, 200)
         self.assertEqual(post_2.text, 'Измененный текст')

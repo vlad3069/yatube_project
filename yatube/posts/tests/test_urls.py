@@ -15,7 +15,6 @@ class PostURLTests(TestCase):
         cls.post = Post.objects.create(
             author=cls.user,
             text='Тестовый пост',
-            id=20,
         )
         cls.group = Group.objects.create(
             title='Тестовая группа',
@@ -35,12 +34,13 @@ class PostURLTests(TestCase):
 
     def test_public_urls(self):
         """Страница / доступна любому пользователю."""
-        url_names = [
+        post_id = PostURLTests.post.id
+        url_names = (
             '/',
             '/group/test-slug/',
             '/profile/test/',
-            '/posts/20/',
-        ]
+            '/posts/' + str(post_id) + '/',
+        )
         for url in url_names:
             with self.subTest(url=url):
                 response = self.guest_client.get(url)
@@ -69,7 +69,7 @@ class PostURLTests(TestCase):
             response, '/posts/' + str(post_id) + '/'
         )
 
-    def test_login_for_guest(self):
+    def test_post_edit_for_guest(self):
         """Страница posts/<int:post_id>/edit/ перенаправляет гостя на вход"""
         post_id = PostURLTests.post.id
         response = self.guest_client.get(
@@ -77,6 +77,8 @@ class PostURLTests(TestCase):
         self.assertRedirects(
             response, '/auth/login/?next=/posts/' + str(post_id) + '/edit/'
         )
+
+    def test_post_create_for_guest(self):
         """Страница /create/ перенаправляет гостя на вход"""
         response = self.guest_client.get('/create/', follow=True)
         self.assertRedirects(response, '/auth/login/?next=/create/')
