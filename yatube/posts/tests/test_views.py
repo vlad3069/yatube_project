@@ -190,8 +190,24 @@ class PostTests(TestCase):
                     self.post.image
                 )
 
-
-
+    def test_add_auth_client_comment(self):
+        """Комментировать посты может только авторизованный пользователь"""
+        post_id = PostTests.post.id
+        self.authorized_client.post(reverse('posts:add_comment',
+                                    kwargs={'post_id': post_id}),
+                                    {'text': "Авторизованный комментарий"},
+                                    follow=True)
+        response = self.authorized_client.get(reverse
+                                              ('posts:post_detail',
+                                               kwargs={'post_id': post_id}))
+        self.assertContains(response, 'Авторизованный комментарий')
+        self.guest_client.post(reverse('posts:add_comment',
+                               kwargs={'post_id': post_id}),
+                               {'text': "Гостевой комментарий"},
+                               follow=True)
+        response = self.guest_client.get(reverse('posts:post_detail',
+                                         kwargs={'post_id': post_id}))
+        self.assertNotContains(response, 'Гостевой комментарий')
 
 
 class PaginatorViewsTest(TestCase):

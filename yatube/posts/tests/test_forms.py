@@ -4,7 +4,7 @@ import tempfile
 from django.conf import settings
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.contrib.auth import get_user_model
-from posts.models import Group, Post
+from posts.models import Comment, Group, Post
 from django.test import Client, TestCase, override_settings
 from django.urls import reverse
 from http import HTTPStatus
@@ -112,3 +112,15 @@ class PostCreateFormTests(TestCase):
         )
         self.assertEqual(Post.objects.count(), posts_count + 1)
         self.assertTrue(Post.objects.filter(text='Тестовый пост',).exists())
+
+    def test_add_comment(self):
+        """Комментарий появляется на странице поста"""
+        post_id = PostCreateFormTests.post.id
+        comment_count = Comment.objects.count()
+        self.authorized_client.post(reverse('posts:add_comment',
+                                    kwargs={'post_id': post_id}),
+                                    {'text': "Авторизованный комментарий"},
+                                    follow=True)
+        self.assertEqual(Comment.objects.count(), comment_count + 1)
+        self.assertTrue(Comment.objects.filter(
+            text='Авторизованный комментарий',).exists())
