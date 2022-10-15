@@ -8,6 +8,7 @@ from posts.models import Group, Post
 from django.test import Client, TestCase, override_settings
 from django.urls import reverse
 from django import forms
+from django.core.cache import cache
 
 User = get_user_model()
 
@@ -208,6 +209,17 @@ class PostTests(TestCase):
         response = self.guest_client.get(reverse('posts:post_detail',
                                          kwargs={'post_id': post_id}))
         self.assertNotContains(response, 'Гостевой комментарий')
+
+    def test_cashe_index_page(self):
+        """Проверка кэша главной страницы"""
+        first_page = self.authorized_client.get(reverse('posts:index'))
+        post = first_page.context['page_obj'][0]
+        post.delete()
+        second_page = self.authorized_client.get(reverse('posts:index'))
+        self.assertEqual(second_page.content, first_page.content)
+        cache.clear()
+        third_page = self.authorized_client.get(reverse('posts:index'))
+        self.assertNotEqual(third_page.content, first_page.content)
 
 
 class PaginatorViewsTest(TestCase):
