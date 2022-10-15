@@ -44,25 +44,25 @@ class PostURLTests(TestCase):
         for url in url_names:
             with self.subTest(url=url):
                 response = self.guest_client.get(url)
-                self.assertEquals(response.status_code, HTTPStatus.OK)
+                self.assertEqual(response.status_code, HTTPStatus.OK)
                 response = self.authorized_client.get(url)
-                self.assertEquals(response.status_code, HTTPStatus.OK)
+                self.assertEqual(response.status_code, HTTPStatus.OK)
 
     def test_not_found_urls(self):
         """Страница '/unexisting_page/' недоступна"""
         response = self.guest_client.get('/unexisting_page/')
-        self.assertEquals(response.status_code, HTTPStatus.NOT_FOUND)
+        self.assertEqual(response.status_code, HTTPStatus.NOT_FOUND)
 
     def test_post_edit_for_auth_users(self):
         """Страница /create/ доступна только авторизованному пользователю"""
         response = self.authorized_client.get('/create/')
-        self.assertEquals(response.status_code, HTTPStatus.OK)
+        self.assertEqual(response.status_code, HTTPStatus.OK)
 
     def test_post_edit_for_author(self):
         """Страница posts/<int:post_id>/edit/ доступна только автору"""
         post_id = PostURLTests.post.id
         response = self.post_author.get('/posts/' + str(post_id) + '/')
-        self.assertEquals(response.status_code, HTTPStatus.OK)
+        self.assertEqual(response.status_code, HTTPStatus.OK)
         response = self.authorized_client.get(
             '/posts/' + str(post_id) + '/edit/', follow=True)
         self.assertRedirects(

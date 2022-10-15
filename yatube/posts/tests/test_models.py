@@ -17,11 +17,13 @@ class PostModelTest(TestCase):
         )
 
     def test_models_have_correct_object_names(self):
+        """Модель поста имеет корректные наменования"""
         post = PostModelTest.post
         expected_object_name = post.text[:15]
         self.assertEqual(expected_object_name, str(post))
 
     def test_verbose_name(self):
+        """Модель поста имеет корректные verbose_name"""
         post = PostModelTest.post
         field_verboses = {
             'text': 'Текст поста',
@@ -35,6 +37,7 @@ class PostModelTest(TestCase):
                     post._meta.get_field(value).verbose_name, expected)
 
     def test_help_text(self):
+        """Модель поста имеет корректные help_text"""
         post = PostModelTest.post
         field_help_texts = {
             'text': 'Введите текст поста',
@@ -58,11 +61,13 @@ class GroupModelTest(TestCase):
         )
 
     def test_models_have_correct_object_names(self):
+        """Модель группы имеет корректные наименования"""
         group = GroupModelTest.group
         expected_object_name = f'Группа: {group.title}'
         self.assertEqual(expected_object_name, str(group))
 
     def test_verbose_name(self):
+        """Модель группы имеет корректные verbose_name"""
         group = GroupModelTest.group
         field_verboses = {
             'title': 'Заголовок',
@@ -75,6 +80,7 @@ class GroupModelTest(TestCase):
                     group._meta.get_field(value).verbose_name, expected)
 
     def test_help_text(self):
+        """Модель группы имеет корректные help_text"""
         group = GroupModelTest.group
         field_help_texts = {
             'title': 'Введите название группы',
