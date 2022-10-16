@@ -4,7 +4,7 @@ import tempfile
 from django.conf import settings
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.contrib.auth import get_user_model
-from posts.models import Group, Post
+from posts.models import Group, Post, Follow
 from django.test import Client, TestCase, override_settings
 from django.urls import reverse
 from django import forms
@@ -175,7 +175,7 @@ class PostTests(TestCase):
         self.assertFalse(response.context['page_obj'])
 
     def test_post_with_image_creat_to_need(self):
-        """Пост с картинкой выводиться на на главную страницу,
+        """Пост с картинкой выводиться не на главную страницу,
         на страницу профайла, на страницу группы
         """
         reverse_name = [
@@ -268,3 +268,59 @@ class PaginatorViewsTest(TestCase):
         for url in list_reverse:
             response = self.client.get(url + '?page=2')
             self.assertEqual(len(response.context['page_obj']), 3)
+
+
+class FollowViewsTest(TestCase):
+    def setUp(self):
+        self.guest_client = Client()
+        self.authorized_client = Client()
+        self.authorized = User.objects.create_user(username='authorized')
+        self.authorized_client.force_login(self.authorized)
+        self.follower_client = Client()
+        self.follower = User.objects.create_user(username='follower')
+        self.follower_client.force_login(self.follower)
+        self.following_client = Client()
+        self.following = User.objects.create_user(username='following')
+        self.following_client.force_login(self.following)
+        self.post = Post.objects.create(
+            author=self.following,
+            text='Тестовая запись'
+        )
+
+    def test_auth_follow(self):
+        """Зарегестрированный пользователь может подписаться"""
+        username = self.following.username
+        following_count = Follow.objects.count()
+        self.follower_client.get(reverse('posts:profile_follow',
+                                 kwargs={'username': username}))
+        self.assertEqual(Follow.objects.count(), following_count + 1)
+
+    def test_guest_follow(self):
+        """Незарегестрированный пользователь несможет подписаться"""
+        username = self.following.username
+        following_count = Follow.objects.count()
+        self.guest_client.get(reverse('posts:profile_follow',
+                              kwargs={'username': username}))
+        self.assertEqual(Follow.objects.count(), following_count)
+
+    def test_auth_unfollow(self):
+        """Подписаный пользователь может отписаться"""
+        username = self.following.username
+        self.follower_client.get(reverse('posts:profile_follow',
+                                 kwargs={'username': username}))
+        following_count = Follow.objects.count()
+        self.follower_client.get(reverse('posts:profile_unfollow',
+                                 kwargs={'username': username}))
+        self.assertEqual(Follow.objects.count(), following_count - 1)
+
+    def test_followers_feed(self):
+        """Запись появляется только в ленте подписчиков"""
+        username = self.following.username
+        self.follower_client.get(reverse('posts:profile_follow',
+                                 kwargs={'username': username}))
+        response_follower = self.follower_client.get(
+                                reverse('posts:follow_index'))
+        self.assertEqual(len(response_follower.context['page_obj']), 1)
+        response_authorized = self.authorized_client.get(
+                                reverse('posts:follow_index'))
+        self.assertEqual(len(response_authorized.context['page_obj']), 0)
