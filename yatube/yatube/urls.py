@@ -5,6 +5,8 @@ from django.conf.urls.static import static
 
 handler404 = 'core.views.page_not_found'
 handler400 = 'core.views.csrf_failure'
+handler500 = 'core.views.server_error'
+handler403 = 'core.views.permission_denied'
 
 urlpatterns = [
     path('admin/', admin.site.urls),
