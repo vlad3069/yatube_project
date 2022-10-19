@@ -2,6 +2,8 @@ from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.shortcuts import redirect, render, get_object_or_404
 
+from django.views.generic import (ListView,)
+
 from .models import Follow, Post, Group, User
 from .forms import PostForm, CommentForm
 
@@ -15,14 +17,10 @@ def pagin(posts, request):
     return paginator.get_page(page_number)
 
 
-def index(request):
-    template = 'posts/index.html'
-    posts = Post.objects.select_related('group')
-    page_obj = pagin(posts, request)
-    context = {
-        'page_obj': page_obj,
-    }
-    return render(request, template, context)
+class Index(ListView):
+    model = Post
+    template_name: str = 'posts/index.html'
+    paginate_by: int = LIMIT
 
 
 def group_posts(request, slug):
