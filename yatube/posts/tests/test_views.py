@@ -3,17 +3,15 @@ import tempfile
 
 from django.conf import settings
 from django.core.files.uploadedfile import SimpleUploadedFile
-from django.contrib.auth import get_user_model
-from posts.models import Group, Post, Follow
 from django.test import Client, TestCase, override_settings
 from django import forms
 from django.core.cache import cache
 
-from posts.tests.def_uls import (INDEX_URL, GROUP_URL, PROFILE_URL, POST_URL,
-                                 POST_EDIT_URL, POST_CREATE_URL, COMMENT_URL,
-                                 FOLLOW_INDEX_URL, FOLLOW_URL, UNFOLLOW_URL)
+from posts.models import Group, Post, Follow, User
+from posts.def_uls import (INDEX_URL, GROUP_URL, PROFILE_URL, POST_URL,
+                           POST_EDIT_URL, POST_CREATE_URL, COMMENT_URL,
+                           FOLLOW_INDEX_URL, FOLLOW_URL, UNFOLLOW_URL)
 
-User = get_user_model()
 
 TEMP_MEDIA_ROOT = tempfile.mkdtemp(dir=settings.BASE_DIR)
 
@@ -32,8 +30,7 @@ small_gif = (
     b'\xFF\xFF\xFF\x21\xF9\x04\x00\x00'
     b'\x00\x00\x00\x2C\x00\x00\x00\x00'
     b'\x02\x00\x01\x00\x00\x02\x02\x0C'
-    b'\x0A\x00\x3B'
-    )
+    b'\x0A\x00\x3B')
 
 
 @override_settings(MEDIA_ROOT=TEMP_MEDIA_ROOT)
@@ -71,7 +68,6 @@ class PostTests(TestCase):
         shutil.rmtree(TEMP_MEDIA_ROOT, ignore_errors=True)
 
     def setUp(self):
-        self.guest_client = Client()
         self.user = User.objects.create_user(username=USER_NAME)
         self.authorized_client = Client()
         self.authorized_client.force_login(self.user)
@@ -197,10 +193,10 @@ class PostTests(TestCase):
                                     follow=True)
         response = self.authorized_client.get(POST_URL(POST_ID=POST_ID))
         self.assertContains(response, 'Авторизованный комментарий')
-        self.guest_client.post(COMMENT_URL(POST_ID=POST_ID),
-                               {'text': "Гостевой комментарий"},
-                               follow=True)
-        response = self.guest_client.get(POST_URL(POST_ID=POST_ID))
+        self.client.post(COMMENT_URL(POST_ID=POST_ID),
+                         {'text': "Гостевой комментарий"},
+                         follow=True)
+        response = self.client.get(POST_URL(POST_ID=POST_ID))
         self.assertNotContains(response, 'Гостевой комментарий')
 
     def test_cashe_index_page(self):
@@ -235,7 +231,6 @@ class PaginatorViewsTest(TestCase):
         Post.objects.bulk_create(cls.posts)
 
     def setUp(self):
-        self.guest_client = Client()
         self.user = User.objects.create_user(username=USER_NAME)
         self.authorized_client = Client()
         self.authorized_client.force_login(self.user)
@@ -265,7 +260,6 @@ class PaginatorViewsTest(TestCase):
 
 class FollowViewsTest(TestCase):
     def setUp(self):
-        self.guest_client = Client()
         self.authorized_client = Client()
         self.authorized = User.objects.create_user(username='authorized')
         self.authorized_client.force_login(self.authorized)
@@ -291,7 +285,7 @@ class FollowViewsTest(TestCase):
         """Незарегестрированный пользователь несможет подписаться"""
         username = self.following.username
         following_count = Follow.objects.count()
-        self.guest_client.get(FOLLOW_URL(USER_NAME=username))
+        self.client.get(FOLLOW_URL(USER_NAME=username))
         self.assertEqual(Follow.objects.count(), following_count)
 
     def test_auth_unfollow(self):

@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% block title %}Удаление {{ post.text|truncatechars:30 }}{% endblock %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-md-8">
+            <p>
+                Вы действительно хотите удалить пост <strong>{{ post.text|truncatechars:30 }}</strong>?
+                <form method="post">
+                    {% csrf_token %}
+                    <button class="btn btn-danger" type="submit">Да!</button>
+                </form>
+            </p>
+        </div>
+    </div>
+{% endblock %}

@@ -1,12 +1,11 @@
-from django.contrib.auth import get_user_model
 from django.test import TestCase, Client
 from http import HTTPStatus
-from ..models import Group, Post
-from posts.tests.def_uls import (INDEX_URL, GROUP_URL, PROFILE_URL, POST_URL,
-                                 POST_EDIT_URL, POST_CREATE_URL, LOGIN_URL,
-                                 NONE_URL)
 
-User = get_user_model()
+from posts.models import Group, Post, User
+from posts.def_uls import (INDEX_URL, GROUP_URL, PROFILE_URL, POST_URL,
+                           POST_EDIT_URL, POST_CREATE_URL, LOGIN_URL,
+                           NONE_URL)
+
 
 GROUP_TITLE = 'Тестовая группа'
 GROUP_SLUG = 'test-slug'
@@ -33,7 +32,6 @@ class PostURLTests(TestCase):
         )
 
     def setUp(self):
-        self.guest_client = Client()
         self.user = User.objects.create_user(username=USER_NAME)
         self.authorized_client = Client()
         self.authorized_client.force_login(self.user)
@@ -51,14 +49,14 @@ class PostURLTests(TestCase):
         )
         for url in url_names:
             with self.subTest(url=url):
-                response = self.guest_client.get(url)
+                response = self.client.get(url)
                 self.assertEqual(response.status_code, HTTPStatus.OK)
                 response = self.authorized_client.get(url)
                 self.assertEqual(response.status_code, HTTPStatus.OK)
 
     def test_not_found_urls(self):
         """Страница '/unexisting_page/' недоступна."""
-        response = self.guest_client.get(NONE_URL())
+        response = self.client.get(NONE_URL())
         self.assertEqual(response.status_code, HTTPStatus.NOT_FOUND)
 
     def test_post_edit_for_auth_users(self):
@@ -75,13 +73,13 @@ class PostURLTests(TestCase):
 
     def test_post_edit_for_guest(self):
         """Страница posts/<int:post_id>/edit/ перенаправляет гостя на вход."""
-        response = self.guest_client.get(POST_EDIT_URL(POST_ID=POST_ID))
+        response = self.client.get(POST_EDIT_URL(POST_ID=POST_ID))
         self.assertRedirects(response,
                              LOGIN_URL() + POST_EDIT_URL(POST_ID=POST_ID))
 
     def test_post_create_for_guest(self):
         """Страница /create/ перенаправляет гостя на вход."""
-        response = self.guest_client.get(POST_CREATE_URL())
+        response = self.client.get(POST_CREATE_URL())
         self.assertRedirects(response, LOGIN_URL() + POST_CREATE_URL())
 
     def test_urls_uses_correct_template(self):

@@ -9,13 +9,8 @@
         Дата публикации: {{ post.pub_date|date:"d E Y" }} 
       </li>
       <li class="list-group-item"> 
-        {% if post.group %}   
-          {{ post.group }} 
-          <a href="{% url 'posts:group_list' post.group.slug %}">Все записи группы</a>
-        {% else %}
-        Не в группе
-        {% endif %} 
-        </li>
+        {% include 'posts/includes/one_group.html' %}
+      </li>
 
       <li class="list-group-item">
         Автор: {{ post.author.get_full_name }} {{ post.author }}
@@ -25,7 +20,7 @@
       </li>
       <li class="list-group-item">
         <a href="{% url 'posts:profile' post.author %}">
-          Все посты пользователя
+          Все посты автора
         </a>
       </li>
     </ul>
@@ -35,10 +30,21 @@
       <img class="card-img my-2" src="{{ im.url }}">
     {% endthumbnail %}
     <p>{{ post.text }}</p>
+
     {% if post.author == user %}
-    <a class="btn btn-primary" href="{% url 'posts:post_edit' post.id %}">
-      редактировать запись
-    </a>
+    <div class="row">
+      <div class="col-md-10">
+          <a href="{% url 'posts:post_edit' post.id %}">
+              <button class="btn btn-warning">Редактировать</button>
+          </a>
+      </div>
+
+      <div class="col-md-2 text-right">
+          <a href="{% url 'posts:post_delete' post.id %}">
+              <button type="submit" class="btn btn-danger">Удалить</button>
+          </a>
+      </div>
+  </div>
     {% endif %} 
   </article>
 </div> 
@@ -47,14 +53,3 @@
   {% include 'posts/includes/comment.html' %}
 </div>
 {% endblock %}
-
-
-
-
-
-
-
-
-
- 
-     

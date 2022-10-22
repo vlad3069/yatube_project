@@ -3,15 +3,13 @@ import tempfile
 
 from django.conf import settings
 from django.core.files.uploadedfile import SimpleUploadedFile
-from django.contrib.auth import get_user_model
-from posts.models import Comment, Group, Post
 from django.test import Client, TestCase, override_settings
 from http import HTTPStatus
-from posts.tests.def_uls import (INDEX_URL, POST_EDIT_URL,
-                                 POST_CREATE_URL, COMMENT_URL)
 
+from posts.models import Comment, Group, Post, User
+from posts.def_uls import (INDEX_URL, POST_EDIT_URL,
+                           POST_CREATE_URL, COMMENT_URL)
 
-User = get_user_model()
 
 TEMP_MEDIA_ROOT = tempfile.mkdtemp(dir=settings.BASE_DIR)
 
@@ -30,8 +28,7 @@ small_gif = (
     b'\xFF\xFF\xFF\x21\xF9\x04\x00\x00'
     b'\x00\x00\x00\x2C\x00\x00\x00\x00'
     b'\x02\x00\x01\x00\x00\x02\x02\x0C'
-    b'\x0A\x00\x3B'
-    )
+    b'\x0A\x00\x3B')
 
 
 @override_settings(MEDIA_ROOT=TEMP_MEDIA_ROOT)
@@ -58,7 +55,6 @@ class PostCreateFormTests(TestCase):
         shutil.rmtree(TEMP_MEDIA_ROOT, ignore_errors=True)
 
     def setUp(self):
-        self.guest_client = Client()
         self.user = User.objects.create_user(username=USER_NAME)
         self.authorized_client = Client()
         self.authorized_client.force_login(self.user)

@@ -10,11 +10,6 @@
   Подробная информация
 </a>
 <p>  
-  {% if post.group %}
-    {{ post.group }}   
-      <a href="{% url 'posts:group_list' post.group.slug %}">все записи группы</a>
-  {% else %}
-    Не в группе
-  {% endif %}
+  {% include 'posts/includes/one_group.html' %}
 </p>  
 {% if not forloop.last %}<hr>{% endif %} 

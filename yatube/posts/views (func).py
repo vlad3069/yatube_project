@@ -1,30 +1,21 @@
 from django.contrib.auth.decorators import login_required
-from django.core.paginator import Paginator
 from django.shortcuts import redirect, render, get_object_or_404
 
-from django.views.generic import (ListView,)
-
-from .models import Follow, Post, Group, User
-from .forms import PostForm, CommentForm
-
-
-LIMIT = 10
+from posts.models import Follow, Post, Group, User
+from posts.forms import PostForm, CommentForm
+from posts.utils import pagin
 
 
-def pagin(posts, request):
-    paginator = Paginator(posts, LIMIT)
-    page_number = request.GET.get('page')
-    return paginator.get_page(page_number)
-
-
-class Index(ListView):
-    model = Post
-    template_name: str = 'posts/index.html'
-    paginate_by: int = LIMIT
+def index(request):
+    posts = Post.objects.select_related('group')
+    page_obj = pagin(posts, request)
+    context = {
+        'page_obj': page_obj,
+    }
+    return render(request, 'posts/index.html', context)
 
 
 def group_posts(request, slug):
-    template = 'posts/group_list.html'
     group = get_object_or_404(Group, slug=slug)
     posts = group.posts.all()
     page_obj = pagin(posts, request)
@@ -32,28 +23,27 @@ def group_posts(request, slug):
         'group': group,
         'page_obj': page_obj,
     }
-    return render(request, template, context)
+    return render(request, 'posts/group_list.html', context)
 
 
-@login_required()
+@login_required
 def post_create(request):
     form = PostForm(
         request.POST or None,
         files=request.FILES or None,
     )
-    template = 'posts/create_post.html'
     context = {
         'form': form,
     }
     if not form.is_valid():
-        return render(request, template, context)
+        return render(request, 'posts/create_post.html', context)
     post = form.save(commit=False)
     post.author = request.user
     post.save()
     return redirect('posts:profile', username=request.user)
 
 
-@login_required()
+@login_required
 def post_edit(request, post_id):
     post = get_object_or_404(Post, pk=post_id,)
     form = PostForm(
@@ -61,7 +51,6 @@ def post_edit(request, post_id):
         files=request.FILES or None,
         instance=post
     )
-    template = 'posts/create_post.html'
     context = {
         'form': form,
         'post': post,
@@ -72,24 +61,22 @@ def post_edit(request, post_id):
     if form.is_valid():
         form.save()
         return redirect('posts:post_detail', post_id)
-    return render(request, template, context)
+    return render(request, 'posts/create_post.html', context)
 
 
 def profile(request, username):
     author = get_object_or_404(User, username=username)
-    template = 'posts/profile.html'
     posts = author.posts.all()
-    if request.user.is_authenticated:
-        following = Follow.objects.filter(user=request.user, author=author)
-    else:
-        following = False
+    following = (request.user.is_authenticated
+                 and Follow.objects.filter(user=request.user, author=author
+                                           ).exists())
     page_obj = pagin(posts, request)
     context = {
         'page_obj': page_obj,
         'author': author,
         'following': following,
     }
-    return render(request, template, context)
+    return render(request, 'posts/profile.html', context)
 
 
 def post_detail(request, post_id):
@@ -118,19 +105,18 @@ def add_comment(request, post_id):
 
 @login_required
 def follow_index(request):
-    template = 'posts/follow.html'
     follow = Post.objects.filter(author__following__user=request.user)
     page_obj = pagin(follow, request)
     context = {
         'page_obj': page_obj,
     }
-    return render(request, template, context)
+    return render(request, 'posts/follow.html', context)
 
 
 @login_required
 def profile_follow(request, username):
+    author = get_object_or_404(User, username=username)
     user = request.user
-    author = User.objects.get(username=username)
     follow = Follow.objects.filter(user=user, author=author)
     if user != author and not follow:
         Follow.objects.create(user=user, author=author)
@@ -140,7 +126,7 @@ def profile_follow(request, username):
 @login_required
 def profile_unfollow(request, username):
     user = request.user
-    author = User.objects.get(username=username)
+    author = get_object_or_404(User, username=username)
     follow = Follow.objects.filter(user=user, author=author)
     if user != author and follow:
         follow.delete()

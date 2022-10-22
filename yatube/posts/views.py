@@ -1,15 +1,13 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
-
 from django.shortcuts import redirect, get_object_or_404
 from django.contrib.auth import get_user_model
 from django.views.generic import (ListView, CreateView, DeleteView,
                                   DetailView, UpdateView, View)
 
-from posts.tests.def_uls import (PROFILE_URL, POST_URL,
-                                 POST_EDIT_URL, POST_CREATE_URL, LOGIN_URL)
-
-from .models import Follow, Post, Group, User, Comment
-from .forms import PostForm, CommentForm
+from posts.models import Follow, Post, Group, User, Comment
+from posts.forms import PostForm, CommentForm
+from posts.def_uls import (PROFILE_URL, POST_URL, POST_EDIT_URL,
+                           POST_CREATE_URL, LOGIN_URL)
 
 
 LIMIT = 10
@@ -68,12 +66,12 @@ class PostEdit(UpdateView, LoginRequiredMixin):
 
     def dispatch(self, request, *args, **kwargs):
         obj = super().get_object()
-        if (obj.author != self.request.user and
-           self.request.user.is_authenticated):
+        if (obj.author != self.request.user
+           and self.request.user.is_authenticated):
             return redirect(POST_URL(self.kwargs['post_id']))
         if self.request.user.is_anonymous:
-            return redirect(LOGIN_URL() +
-                            POST_EDIT_URL(self.kwargs['post_id']))
+            return redirect(LOGIN_URL()
+                            + POST_EDIT_URL(self.kwargs['post_id']))
         return super().dispatch(request, *args, **kwargs)
 
     def form_valid(self, form):
@@ -84,7 +82,18 @@ class PostEdit(UpdateView, LoginRequiredMixin):
 class DeletePost(DeleteView, LoginRequiredMixin):
     model = Post
     success_url = '/'
-    pk_url_kwarg = 'post_id'
+    pk_url_kwarg: str = 'post_id'
+    template_name: str = 'posts/post_delete.html'
+
+    def dispatch(self, request, *args, **kwargs):
+        obj = super().get_object()
+        if (obj.author != self.request.user
+           and self.request.user.is_authenticated):
+            return redirect(POST_URL(self.kwargs['post_id']))
+        if self.request.user.is_anonymous:
+            return redirect(LOGIN_URL()
+                            + POST_URL(self.kwargs['post_id']))
+        return super().dispatch(request, *args, **kwargs)
 
 
 class Profile(ListView):
@@ -137,9 +146,10 @@ class PostDetail(DetailView):
             pk=self.kwargs.get('post_id')
         )
         context['form'] = CommentForm(self.request.POST or None)
-        context['comments'] = Comment.objects.filter(post=context['post']).all()
+        context['comments'] = Comment.objects.filter(
+            post=context['post']).all()
         return context
-        
+
 
 class AddComment(DetailView, LoginRequiredMixin):
     model = Post
