@@ -38,4 +38,4 @@ python3 manage.py createsuperuser
 
 ### Авторы
 
-Владислав
+[vlad9603]Владислав Подтяжкин
